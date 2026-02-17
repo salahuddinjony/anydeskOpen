@@ -66,6 +66,88 @@
   </div>
 
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-  <script src="app.js"></script>
+  <script>
+(function () {
+  var createApp = Vue.createApp;
+  var ANYDESK_WEB_URL = "https://go.anydesk.com";
+
+  function downloadReg(bit) {
+    var path64 = "C:\\Program Files\\AnyDesk\\AnyDesk.exe";
+    var path32 = "C:\\Program Files (x86)\\AnyDesk\\AnyDesk.exe";
+    var exePath = bit === "32" ? path32 : path64;
+    var reg = [
+      "Windows Registry Editor Version 5.00",
+      "",
+      "[HKEY_CLASSES_ROOT\\anydesk]",
+      "@=\"URL:AnyDesk Protocol\"",
+      "\"URL Protocol\"=\"\"",
+      "",
+      "[HKEY_CLASSES_ROOT\\anydesk\\shell\\open\\command]",
+      "@=\"\\\"" + exePath + "\\\" \\\"%1\\\"\""
+    ].join("\r\n");
+    var blob = new Blob([reg], { type: "application/x-msdownload" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "anydesk-protocol-fix-" + bit + "bit.reg";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  createApp({
+    data: function () {
+      return {
+        connectId: "",
+        error: "",
+        copyDone: false
+      };
+    },
+    computed: {
+      rawId: function () {
+        return this.connectId.replace(/\s/g, "");
+      },
+      isIdValid: function () {
+        return /^\d{9,14}$/.test(this.rawId);
+      },
+      webUrl: function () {
+        return this.rawId
+          ? ANYDESK_WEB_URL + "?id=" + encodeURIComponent(this.rawId)
+          : ANYDESK_WEB_URL;
+      }
+    },
+    methods: {
+      formatId: function (e) {
+        var raw = e.target.value.replace(/\D/g, "");
+        this.connectId = raw.replace(/(\d{3})(?=\d)/g, "$1 ").trim();
+        this.error = "";
+      },
+      openAnyDesk: function () {
+        if (!this.isIdValid) {
+          this.error = "Please enter a valid 9–14 digit AnyDesk ID.";
+          return;
+        }
+        this.error = "";
+        window.location.href = "anydesk:" + this.rawId;
+      },
+      openWeb: function () {
+        if (!this.isIdValid) {
+          this.error = "Please enter a valid 9–14 digit AnyDesk ID.";
+          return;
+        }
+        this.error = "";
+        window.open(this.webUrl, "_blank", "noopener,noreferrer");
+      },
+      copyId: function () {
+        var vm = this;
+        if (!vm.rawId) return;
+        navigator.clipboard.writeText(vm.rawId).then(function () {
+          vm.copyDone = true;
+          setTimeout(function () { vm.copyDone = false; }, 2000);
+        });
+      },
+      downloadReg: downloadReg
+    }
+  }).mount("#app");
+})();
+  </script>
 </body>
 </html>
