@@ -43,10 +43,23 @@
 
         <div class="fix-windows">
           <p class="fix-windows-title">Link doesn’t open on Windows?</p>
-          <p class="fix-windows-desc">Download and run this once to register AnyDesk with Windows. Then "Open AnyDesk App" will work.</p>
+          <p class="fix-windows-desc">Download the .reg and run it. <strong>Right‑click the file → Run as administrator</strong> so Windows installs the handler. Then close and reopen your browser and try again.</p>
           <div class="fix-windows-buttons">
             <button type="button" class="btn btn-outline btn-sm" @click="downloadReg('64')">Fix (64-bit)</button>
             <button type="button" class="btn btn-outline btn-sm" @click="downloadReg('32')">Fix (32-bit)</button>
+            <button type="button" class="btn btn-outline btn-sm" @click="downloadRegCurrentUser('64')">Fix (current user)</button>
+          </div>
+          <p class="fix-windows-custom-desc">AnyDesk not in Program Files? Find <strong>AnyDesk.exe</strong>, copy its full path, paste below, then download the .reg.</p>
+          <input v-model="customExePath" type="text" class="fix-windows-input" placeholder="e.g. C:\Program Files\AnyDesk\AnyDesk.exe">
+          <button type="button" class="btn btn-outline btn-sm fix-windows-custom-btn" @click="downloadRegCustom" :disabled="!customExePathTrim">Download .reg with this path</button>
+          <div class="fix-windows-trouble">
+            <p class="fix-windows-trouble-title">Still says “Launched external handler” but AnyDesk doesn’t open?</p>
+            <ul class="fix-windows-trouble-list">
+              <li>Run the .reg file <strong>as Administrator</strong> (right‑click → Run as administrator).</li>
+              <li>Close the browser completely and open it again, then try “Open AnyDesk App”.</li>
+              <li>Test the handler: press <strong>Win + R</strong>, type <code>"C:\Program Files\AnyDesk\AnyDesk.exe" "anydesk:1258004724"</code>, press Enter. If AnyDesk opens, the app works and the issue is the browser; try another browser (Chrome, Firefox, or Edge) or set a default app for <code>anydesk:</code> in Windows Settings → Apps → Default apps → Choose default apps by protocol.</li>
+              <li>In Windows: Settings → Apps → Default apps → “Choose default apps by protocol” → look for “AnyDesk” or “anydesk” and set it to AnyDesk.</li>
+            </ul>
           </div>
         </div>
 
@@ -71,11 +84,8 @@
   var createApp = Vue.createApp;
   var ANYDESK_WEB_URL = "https://go.anydesk.com";
 
-  function downloadReg(bit) {
-    var path64 = "C:\\Program Files\\AnyDesk\\AnyDesk.exe";
-    var path32 = "C:\\Program Files (x86)\\AnyDesk\\AnyDesk.exe";
-    var exePath = bit === "32" ? path32 : path64;
-    var reg = [
+  function makeRegContent(exePath) {
+    return [
       "Windows Registry Editor Version 5.00",
       "",
       "[HKEY_CLASSES_ROOT\\anydesk]",
@@ -85,10 +95,56 @@
       "[HKEY_CLASSES_ROOT\\anydesk\\shell\\open\\command]",
       "@=\"\\\"" + exePath + "\\\" \\\"%1\\\"\""
     ].join("\r\n");
+  }
+
+  function makeRegContentCurrentUser(exePath) {
+    return [
+      "Windows Registry Editor Version 5.00",
+      "",
+      "[HKEY_CURRENT_USER\\Software\\Classes\\anydesk]",
+      "@=\"URL:AnyDesk Protocol\"",
+      "\"URL Protocol\"=\"\"",
+      "",
+      "[HKEY_CURRENT_USER\\Software\\Classes\\anydesk\\shell\\open\\command]",
+      "@=\"\\\"" + exePath + "\\\" \\\"%1\\\"\""
+    ].join("\r\n");
+  }
+
+  function downloadReg(bit) {
+    var path64 = "C:\\Program Files\\AnyDesk\\AnyDesk.exe";
+    var path32 = "C:\\Program Files (x86)\\AnyDesk\\AnyDesk.exe";
+    var exePath = bit === "32" ? path32 : path64;
+    var reg = makeRegContent(exePath);
     var blob = new Blob([reg], { type: "application/x-msdownload" });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "anydesk-protocol-fix-" + bit + "bit.reg";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function downloadRegCurrentUser(bit) {
+    var path64 = "C:\\Program Files\\AnyDesk\\AnyDesk.exe";
+    var path32 = "C:\\Program Files (x86)\\AnyDesk\\AnyDesk.exe";
+    var exePath = bit === "32" ? path32 : path64;
+    var reg = makeRegContentCurrentUser(exePath);
+    var blob = new Blob([reg], { type: "application/x-msdownload" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "anydesk-protocol-fix-current-user-" + bit + "bit.reg";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function downloadRegCustom(path) {
+    path = (path || "").trim().replace(/\//g, "\\");
+    if (!path) return;
+    var exePath = path.replace(/\\/g, "\\\\");
+    var reg = makeRegContent(exePath);
+    var blob = new Blob([reg], { type: "application/x-msdownload" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "anydesk-protocol-fix-custom.reg";
     a.click();
     URL.revokeObjectURL(a.href);
   }
@@ -98,7 +154,8 @@
       return {
         connectId: "",
         error: "",
-        copyDone: false
+        copyDone: false,
+        customExePath: ""
       };
     },
     computed: {
@@ -112,6 +169,9 @@
         return this.rawId
           ? ANYDESK_WEB_URL + "?id=" + encodeURIComponent(this.rawId)
           : ANYDESK_WEB_URL;
+      },
+      customExePathTrim: function () {
+        return this.customExePath.trim().length > 0;
       }
     },
     methods: {
@@ -144,7 +204,11 @@
           setTimeout(function () { vm.copyDone = false; }, 2000);
         });
       },
-      downloadReg: downloadReg
+      downloadReg: downloadReg,
+      downloadRegCurrentUser: downloadRegCurrentUser,
+      downloadRegCustom: function () {
+        downloadRegCustom(this.customExePath);
+      }
     }
   }).mount("#app");
 })();
