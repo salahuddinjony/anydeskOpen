@@ -157,6 +157,52 @@ h1 {
   background: var(--secondary-hover);
 }
 
+.btn-sm {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-outline:hover {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.fix-windows {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: 8px;
+}
+
+.fix-windows-title {
+  margin: 0 0 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.fix-windows-desc {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.fix-windows-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .hint {
   margin: 1.5rem 0 0;
   padding-top: 1.25rem;
@@ -169,4 +215,71 @@ h1 {
 .hint strong {
   color: var(--text);
   font-weight: 500;
+}
+
+.web-fallback {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.web-fallback-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.web-fallback-note {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.web-link {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--primary);
+  word-break: break-all;
+  margin-bottom: 0.5rem;
+}
+
+.web-link:hover {
+  text-decoration: underline;
+}
+
+.web-fallback-id {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.web-fallback-id strong {
+  color: var(--text);
+}
+
+.btn-copy {
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--primary);
+  background: transparent;
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-copy:hover {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.copy-done {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: var(--primary);
 }

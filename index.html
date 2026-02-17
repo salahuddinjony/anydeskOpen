@@ -40,10 +40,27 @@
             Open in Browser
           </button>
         </div>
+
+        <div class="fix-windows">
+          <p class="fix-windows-title">Link doesn’t open on Windows?</p>
+          <p class="fix-windows-desc">Download and run this once to register AnyDesk with Windows. Then "Open AnyDesk App" will work.</p>
+          <div class="fix-windows-buttons">
+            <button type="button" class="btn btn-outline btn-sm" @click="downloadReg('64')">Fix (64-bit)</button>
+            <button type="button" class="btn btn-outline btn-sm" @click="downloadReg('32')">Fix (32-bit)</button>
+          </div>
+        </div>
+
+        <div v-if="isIdValid" class="web-fallback">
+          <p class="web-fallback-title">Web connect (if the link doesn’t open)</p>
+          <p class="web-fallback-note">go.anydesk.com may be blocked on your network (firewall/VPN). Try the desktop app above, or use another network and open:</p>
+          <a :href="webUrl" target="_blank" rel="noopener" class="web-link">{{ webUrl }}</a>
+          <p class="web-fallback-id">Then enter this ID: <strong>{{ rawId }}</strong> <button type="button" class="btn-copy" @click="copyId">Copy ID</button></p>
+          <p v-if="copyDone" class="copy-done">Copied to clipboard</p>
+        </div>
       </div>
 
       <p class="hint">
-        If the app doesn’t open, use <strong>Open in Browser</strong> to connect via go.anydesk.com
+        Prefer <strong>Open AnyDesk App</strong> if the app is installed. Use the browser option only when the app isn’t available.
       </p>
     </main>
   </div>

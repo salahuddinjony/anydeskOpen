@@ -1,54 +1,78 @@
 const { createApp } = Vue;
 
-const ANYDESK_WEB_URL = 'https://go.anydesk.com';
+const ANYDESK_WEB_URL = "https://go.anydesk.com";
 
 createApp({
   data() {
     return {
-      connectId: '',
-      error: '',
-      appOpened: false,
+      connectId: "",
+      error: "",
+      copyDone: false,
     };
   },
   computed: {
     rawId() {
-      return this.connectId.replace(/\s/g, '');
+      return this.connectId.replace(/\s/g, "");
     },
     isIdValid() {
       return /^\d{9,14}$/.test(this.rawId);
     },
+    webUrl() {
+      return this.rawId
+        ? `${ANYDESK_WEB_URL}?id=${encodeURIComponent(this.rawId)}`
+        : ANYDESK_WEB_URL;
+    },
   },
   methods: {
     formatId(e) {
-      const raw = e.target.value.replace(/\D/g, '');
-      this.connectId = raw.replace(/(\d{3})(?=\d)/g, '$1 ').trim();
-      this.error = '';
+      const raw = e.target.value.replace(/\D/g, "");
+      this.connectId = raw.replace(/(\d{3})(?=\d)/g, "$1 ").trim();
+      this.error = "";
     },
     openAnyDesk() {
       if (!this.isIdValid) {
-        this.error = 'Please enter a valid 9–14 digit AnyDesk ID.';
+        this.error = "Please enter a valid 9–14 digit AnyDesk ID.";
         return;
       }
-      this.error = '';
+      this.error = "";
       const url = `anydesk:${this.rawId}`;
       window.location.href = url;
-      this.appOpened = true;
-      // Fallback hint: if app doesn't open, user can click "Open in Browser"
-      setTimeout(() => {
-        if (this.appOpened) {
-          this.appOpened = false;
-        }
-      }, 2500);
     },
     openWeb() {
       if (!this.isIdValid) {
-        this.error = 'Please enter a valid 9–14 digit AnyDesk ID.';
+        this.error = "Please enter a valid 9–14 digit AnyDesk ID.";
         return;
       }
-      this.error = '';
-      // go.anydesk.com: open in new tab; ID can be passed if the site supports it
-      const url = `${ANYDESK_WEB_URL}?id=${encodeURIComponent(this.rawId)}`;
-      window.open(url, '_blank', 'noopener,noreferrer');
+      this.error = "";
+      window.open(this.webUrl, "_blank", "noopener,noreferrer");
+    },
+    copyId() {
+      if (!this.rawId) return;
+      navigator.clipboard.writeText(this.rawId).then(() => {
+        this.copyDone = true;
+        setTimeout(() => { this.copyDone = false; }, 2000);
+      });
+    },
+    downloadReg(bit) {
+      const path64 = "C:\\Program Files\\AnyDesk\\AnyDesk.exe";
+      const path32 = "C:\\Program Files (x86)\\AnyDesk\\AnyDesk.exe";
+      const exePath = bit === "32" ? path32 : path64;
+      const reg = [
+        "Windows Registry Editor Version 5.00",
+        "",
+        "[HKEY_CLASSES_ROOT\\anydesk]",
+        "@=\"URL:AnyDesk Protocol\"",
+        "\"URL Protocol\"=\"\"",
+        "",
+        "[HKEY_CLASSES_ROOT\\anydesk\\shell\\open\\command]",
+        "@=\"\\\"" + exePath + "\\\" \\\"%1\\\"\"",
+      ].join("\r\n");
+      const blob = new Blob([reg], { type: "application/x-msdownload" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "anydesk-protocol-fix-" + bit + "bit.reg";
+      a.click();
+      URL.revokeObjectURL(a.href);
     },
   },
-}).mount('#app');
+}).mount("#app");
