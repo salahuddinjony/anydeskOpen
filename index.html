@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AnyDesk Connect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <main class="card">
+      <div class="logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H8l4-6 4 6h-3v4h-2z" fill="currentColor"/>
+        </svg>
+        <h1>AnyDesk Connect</h1>
+      </div>
+      <p class="subtitle">Enter the AnyDesk ID to connect remotely</p>
+
+      <div class="form">
+        <label for="anydesk-id">AnyDesk ID</label>
+        <input
+          id="anydesk-id"
+          v-model="connectId"
+          type="text"
+          placeholder="e.g. 123 456 789"
+          maxlength="14"
+          @input="formatId"
+        >
+        <p v-if="error" class="error">{{ error }}</p>
+
+        <div class="actions">
+          <button class="btn btn-primary" @click="openAnyDesk" :disabled="!isIdValid">
+            Open AnyDesk App
+          </button>
+          <button class="btn btn-secondary" @click="openWeb" :disabled="!isIdValid">
+            Open in Browser
+          </button>
+        </div>
+      </div>
+
+      <p class="hint">
+        If the app doesn’t open, use <strong>Open in Browser</strong> to connect via go.anydesk.com
+      </p>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
